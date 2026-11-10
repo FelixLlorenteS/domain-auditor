@@ -1,0 +1,95 @@
+{
+  "name": "domain-auditor",
+  "version": "1.0.0",
+  "description": "Audit a domain or IP: DNS, SPF, DKIM, DMARC, MTA-STS, DNSSEC, CAA, RDAP and, in the desktop app, HTTPS, TLS and security headers.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Félix Llorente (https://felixllorente.com)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "validate": "vitest run --config validation/vitest.config.ts",
+    "validate:nl": "vitest run --config validation/vitest.nl.config.ts",
+    "desktop": "pnpm build && electron .",
+    "dist:linux": "pnpm build && electron-builder --linux AppImage rpm tar.gz --publish never",
+    "dist:win": "pnpm build && electron-builder --win zip --publish never",
+    "e2e": "pnpm build && node tests/e2e/desktop.mjs"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@types/node": "^22.20.4",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron"
+    ]
+  },
+  "main": "desktop/main.mjs",
+  "build": {
+    "appId": "com.felixllorente.domainauditor",
+    "productName": "Domain Auditor",
+    "copyright": "© 2026 Félix Llorente",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "desktop/**",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "rpm",
+        "tar.gz"
+      ],
+      "category": "Network",
+      "icon": "build/icon.png",
+      "maintainer": "Félix Llorente <felixllorentesotillo@outlook.es>",
+      "synopsis": "Auditoría de seguridad de dominios: correo, DNS, web y registro",
+      "artifactName": "Domain-Auditor-${version}-${arch}.${ext}"
+    },
+    "rpm": {
+      "artifactName": "domain-auditor-${version}.${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable",
+        "zip"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true,
+      "artifactName": "Domain-Auditor-${version}-windows-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Domain-Auditor-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Domain-Auditor-${version}-portable.exe"
+    }
+  },
+  "desktopName": "domain-auditor.desktop"
+}
