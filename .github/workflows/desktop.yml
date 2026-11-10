@@ -1,0 +1,47 @@
+name: Desktop
+
+# Builds the desktop app on each system, by hand or when a version tag is pushed.
+# The files are kept as workflow artifacts (private, like the repository); nothing
+# is published. Windows builds its installer natively (NSIS needs Windows or Wine).
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            targets: --win nsis portable zip
+          - os: ubuntu-latest
+            targets: --linux AppImage rpm tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec electron-builder ${{ matrix.targets }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: domain-auditor-${{ runner.os }}
+          path: |
+            release/*.exe
+            release/*.zip
+            release/*.AppImage
+            release/*.rpm
+            release/*.tar.gz
+          retention-days: 30
